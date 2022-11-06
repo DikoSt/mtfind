@@ -47,7 +47,6 @@ std::string compareStrWithMask(const std::string &str, const std::string &masked
 size_t findWithMask(const std::string &inputString, std::string &maskForFind, size_t pos = 0){
     int lengthMask = maskForFind.length();
     int lengthString = inputString.length();
-    int startToFind = 0, stopToFind = lengthString;
 
     for  ( int iStrCounter = pos; iStrCounter <= lengthString - lengthMask; ++iStrCounter){
         std::string strWithoutMask = compareStrWithMask(inputString.substr(iStrCounter,lengthMask), maskForFind);
@@ -65,7 +64,7 @@ std::map <size_t, std::string> countSubstrInString (const std::string &inputStr,
     std::string maskFind = findMask;
     size_t pos = findWithMask(inputStr, maskFind);
     while (pos != std::string::npos){
-        posSubstr[pos] = maskFind;
+        posSubstr[pos+1] = maskFind; //нумерация в string с 0, а обычные люди считают от 1.
         pos += findMask.length();
         maskFind = findMask;
         pos = findWithMask(inputStr, maskFind, pos);
@@ -73,9 +72,13 @@ std::map <size_t, std::string> countSubstrInString (const std::string &inputStr,
     return posSubstr;
 }
 
+
 int main(int argc, char* argv[]) {
 std::string fileName = "input.txt";
 std::string maskForFind = "?ad";
+//    std::string maskForFind = "An";
+size_t amountInsertion = 0;
+
 /*
     if (argc == 1 || argc != 3) {
         PrintHelp();
@@ -89,12 +92,43 @@ std::string maskForFind = "?ad";
     std::cout << fileName << std::endl;
     std::cout << maskForFind << std::endl;
 
-    auto res = countSubstrInString("kjaddsf afjhfad jkfdsag hjad kjfsdaad ajkshv", "?ad");
 
+    std::fstream textFile;
+
+    textFile.open(fileName, std::ios::in);
+    if (!textFile.is_open()){
+        std::cout << "Unable to open file " + fileName << std::endl;
+    } else
+    {
+        // построчное чтение файла
+        std::string readString;
+        size_t numberReadingString = 1;
+        while (!textFile.eof()){
+            std::getline(textFile, readString);
+
+            //std::map <size_t, std::string>
+            auto res = countSubstrInString(readString, maskForFind);
+            results.insert(std::pair<size_t, std::map <size_t, std::string>>(numberReadingString, res));
+            amountInsertion += res.size();
+            numberReadingString++;
+        }
+    }
+// вывод полученных результатов
+std::cout << amountInsertion << std::endl;
+    for (const auto &itemByString:results){
+        for (const auto &item:itemByString.second){
+            std::cout << itemByString.first << " "; //номер строки
+            std::cout << item.first << " "; // позиция вхождения
+            std::cout << item.second << std::endl; // строка вхождения и перевод строки.
+        }
+    }
+
+
+    /*
     for (const auto &item:res){
         std::cout << item.first << " " << item.second << std::endl;
     }
-
+*/
  //   std::cout << findWithMask("kjaddsf afjhfad jkfdsag hjad kjfsdaad ajkshv", "ad");
     //std::cout << std::boolalpha << compareStrWithMask("asdfghj", "?sdfgh?");
 
